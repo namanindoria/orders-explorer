@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" style="background:#0f172a; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;">
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#0f172a"/>
+
+  <!-- Top App Navigation Bar -->
+  <rect x="0" y="0" width="1200" height="48" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="24" y="30" fill="#38bdf8" font-size="16" font-weight="bold">◈ MERKLE SCIENCE | ORDERS EXPLORER</text>
+  <rect x="360" y="10" width="340" height="28" rx="4" fill="#0f172a" stroke="#334155"/>
+  <text x="372" y="28" fill="#64748b" font-size="12">⌨ Shortcuts: [↑↓←→ Move] [Space Select] [Enter Details]</text>
+  
+  <!-- Export (disabled in 0 matches) -->
+  <rect x="940" y="10" width="110" height="28" rx="4" fill="#1e293b" stroke="#334155"/>
+  <text x="955" y="28" fill="#64748b" font-size="12" font-weight="600">📥 Export CSV (0)</text>
+  <rect x="1060" y="10" width="120" height="28" rx="4" fill="#1e293b" stroke="#475569"/>
+  <text x="1072" y="28" fill="#94a3b8" font-size="12">13" Dense Mode</text>
+
+  <!-- Filter Builder Section (Active strict condition causing 0 matches) -->
+  <rect x="16" y="58" width="1168" height="116" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="32" y="80" fill="#e2e8f0" font-size="13" font-weight="bold">⚡ FILTER BUILDER (Groups combine with AND · Inside group with OR)</text>
+  
+  <!-- Group 1 -->
+  <rect x="32" y="92" width="620" height="70" rx="4" fill="#0f172a" stroke="#ef4444" stroke-dasharray="3,3"/>
+  <text x="44" y="110" fill="#f87171" font-size="11">Group 1 (Strict Filter)</text>
+  <rect x="170" y="98" width="80" height="24" rx="3" fill="#1e293b" stroke="#64748b"/>
+  <text x="178" y="114" fill="#cbd5e1" font-size="11">amount</text>
+  <rect x="255" y="98" width="40" height="24" rx="3" fill="#1e293b" stroke="#64748b"/>
+  <text x="265" y="114" fill="#cbd5e1" font-size="11">&gt;</text>
+  <rect x="300" y="98" width="100" height="24" rx="3" fill="#1e293b" stroke="#ef4444"/>
+  <text x="310" y="114" fill="#f87171" font-size="11">₹9,999,999</text>
+  <text x="410" y="114" fill="#ef4444" font-size="14" font-weight="bold">×</text>
+
+  <rect x="44" y="132" width="95" height="22" rx="3" fill="#334155"/>
+  <text x="52" y="147" fill="#cbd5e1" font-size="11">+ Condition (OR)</text>
+
+  <!-- Add Group Button -->
+  <rect x="670" y="108" width="90" height="36" rx="4" fill="#1e293b" stroke="#3b82f6"/>
+  <text x="682" y="131" fill="#38bdf8" font-size="11" font-weight="bold">+ Add Group</text>
+
+  <!-- Active Filter Chips & Live Result Counts (0 matches) -->
+  <rect x="16" y="182" width="1168" height="36" rx="4" fill="#0f172a" stroke="#1e293b"/>
+  <text x="28" y="205" fill="#64748b" font-size="11" font-weight="bold">ACTIVE CHIPS:</text>
+  
+  <rect x="110" y="188" width="180" height="24" rx="12" fill="#7f1d1d" stroke="#ef4444"/>
+  <text x="122" y="204" fill="#fca5a5" font-size="11">Amount &gt; ₹9,999,999 ×</text>
+
+  <rect x="300" y="188" width="90" height="24" rx="12" fill="#ef4444"/>
+  <text x="312" y="204" fill="#ffffff" font-size="11" font-weight="bold">Clear all ↺</text>
+
+  <!-- Live Counter Status -->
+  <text x="960" y="205" fill="#ef4444" font-size="13" font-weight="bold">0 of 49,970 orders</text>
+  <text x="1100" y="205" fill="#64748b" font-size="11">(0 selected)</text>
+
+  <!-- Empty State Area (replaces table body) -->
+  <rect x="16" y="226" width="1168" height="500" rx="6" fill="#1e293b" stroke="#334155"/>
+  
+  <!-- Empty State Card / Artwork -->
+  <circle cx="600" cy="400" r="44" fill="#0f172a" stroke="#475569" stroke-width="2"/>
+  <text x="585" y="412" font-size="36" fill="#94a3b8">🔍</text>
+  
+  <text x="600" y="480" fill="#f8fafc" font-size="18" font-weight="bold" text-anchor="middle">No orders match your filter criteria</text>
+  <text x="600" y="510" fill="#94a3b8" font-size="13" text-anchor="middle">We couldn't find any orders matching "Amount &gt; ₹9,999,999".</text>
+  <text x="600" y="530" fill="#64748b" font-size="12" text-anchor="middle">Try adjusting your filters or resetting them to view the complete catalog.</text>
+
+  <!-- Big Clear Filters Button -->
+  <rect x="520" y="555" width="160" height="40" rx="6" fill="#3b82f6" stroke="#2563eb"/>
+  <text x="600" y="580" fill="#ffffff" font-size="13" font-weight="bold" text-anchor="middle">↺ Reset All Filters</text>
+
+  <!-- Bottom Status Bar -->
+  <rect x="0" y="770" width="1200" height="30" fill="#090d16" stroke="#1e293b"/>
+  <text x="16" y="790" fill="#64748b" font-size="11">Merkle Science Frontend Evaluation • Custom Virtual Grid &amp; Filter Engine • URL Synced</text>
+  <text x="1000" y="790" fill="#94a3b8" font-size="11">● 0 rows rendered</text>
+</svg>
