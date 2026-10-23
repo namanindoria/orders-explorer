@@ -1,27 +1,28 @@
-# Orders Explorer — Merkle Science Frontend Take-Home Assignment
+# Orders Explorer
 
-A high-density, keyboard-driven Orders Explorer engineered for operations teams working on 13-inch laptops. Built with **React**, **TypeScript**, and **Vite** with **zero data grid, virtualization, or query-builder libraries**.
+Take-home frontend assignment for Merkle Science. A dense, keyboard-friendly data grid and filter builder built for an ops team working on 13-inch laptops.
+
+Built with **React**, **TypeScript**, **Vite**, and **Tailwind CSS**. All grid virtualization, column resizing, pinning, multi-select, and filter-building logic were written completely from scratch with zero table or query-builder libraries.
 
 ---
 
-## 1. How to Run It
+## 1. How to run it
 
-### Prerequisites
-- **Node.js**: v24 (v24.15.0+ tested)
-- **Package Manager**: `npm` or `pnpm`
+### Setup
+Tested on Node 24 (`v24.15.0`) with npm.
 
-### Exact Commands
 ```bash
 # 1. Install dependencies
 npm install
 
-# 2. Start development server
+# 2. Run the dev server
 npm run dev
 ```
-Open **[http://localhost:5173](http://localhost:5173)** in your browser.
+
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ```bash
-# 3. Production build (typechecking + bundling)
+# 3. Production build & type check
 npm run build
 ```
 
@@ -29,83 +30,84 @@ npm run build
 
 ## 2. Screenshots
 
-### Main Screen with 50,000 Live Orders
+### Normal screen with data (50,000 orders)
 ![Main Screen with Data](screenshots/main-screen-data.png)
 
-### Zero Matches Empty State
+### Empty state (0 orders matched)
 ![Empty State](screenshots/empty-state.png)
 
-*(Wireframe design sketches created prior to coding can be found in the [`design/`](design/) directory).*
+*(You can also find my initial planning sketches and Excalidraw files in the [`design/`](design/) folder).*
 
 ---
 
 ## 3. Dependencies
 
-In strict accordance with the assignment rules, **no table, grid, virtualization, or query-builder libraries are used**. The data grid virtualization, column resizing, pinning, multi-selection, and filter engine are written 100% from scratch.
+I kept runtime dependencies down to the absolute bare minimum:
 
-### Runtime Dependencies
-- **`react` & `react-dom`** (`^19.0.0`): Core UI library for component rendering and state lifecycle.
-- **`lucide-react`** (`^1.16.0`): Crisp, lightweight SVG icons for operations chrome (pin, sorting indicators, clipboard copy, delete, and keyboard shortcuts) without heavy component library overhead.
+- `react` & `react-dom` (`^19.0.0`): Needed for UI component tree and state management.
+- `lucide-react` (`^1.16.0`): Lightweight SVG icons (pin, sort arrows, copy button, trash) so I didn't have to manually write inline SVG paths for every button.
 
-*(Note: Tailwind CSS and TypeScript are compile-time developer tools and introduce zero runtime footprint).*
-
----
-
-## 4. Data Loading
-
-### Strategy
-1. The 17.2 MB dataset is hosted at `public/orders.json` for reliable local streaming fetch.
-2. Data fetching, JSON parsing, schema normalization, and deduplication are executed inside a **dedicated Web Worker** (`src/workers/dataWorker.ts`) with a graceful main-thread fallback.
-3. All 10 data sanitation rules from `data-notes.md` are executed in one unified pipeline before reaching the UI:
-   - Unified `customer_name` (v1) and `customerName` (v2) into a single "Customer" column.
-   - Converted v1 amounts from paise to rupees (divided by 100); sanitized string amounts; formatted using Indian currency convention (`₹1,23,456.50`).
-   - Unified all 4 date representations (ISO with tz, ISO without tz treated as UTC, epoch seconds, DD/MM/YYYY midnight UTC) into epoch timestamps and consistent UTC strings.
-   - Deduplicated order IDs (~30 pairs) prioritizing later `updatedAt`, existing `updatedAt`, or later occurrence in file.
-   - Handled null `updatedAt` values by sorting them to the bottom/last.
-   - Normalized status to lowercase and region to uppercase.
-   - Handled missing priority as `None`.
-   - Stripped HTML tags from notes to prevent XSS.
-   - Trimmed trailing spaces from `"INR "`.
-
-### Why This Choice
-Parsing 17MB of JSON and cleansing 50,030 records takes ~150-250ms of CPU compute. Offloading this work to a Web Worker guarantees that the main UI thread never stutters, leaving loading spinners and initial paint running at 60 FPS.
+*(Tailwind CSS and TypeScript are dev/compile-time tools only and add zero runtime weight. I did not use any table, virtualization, or query-builder libraries).*
 
 ---
 
-## 5. The 200 Rows Question
+## 4. Data loading
 
-### What We Chose
-**Export only the visible, filtered subset of selected rows (e.g. 20 rows), while updating the UI selection count to display `20 selected (filtered from 200 total)`.**
+### How I loaded it
+- I placed `orders.json` in `public/orders.json` and fetched it via `fetch('/orders.json')`.
+- I moved the fetching, JSON parsing, deduplication, and schema cleanup into a dedicated Web Worker (`src/workers/dataWorker.ts`), with a direct main-thread fallback in case workers are blocked.
+- All 10 data cleanup rules from `data-notes.md` are handled in a single normalization pipeline (`src/data/normalize.ts`) before any data reaches the grid or filter:
+  - Unified `customer_name` (v1) and `customerName` (v2) into a single Customer field.
+  - Converted v1 amounts from paise to rupees (`amount / 100`), parsed string amounts, and formatted them using Indian currency format (`₹1,23,456.50`).
+  - Handled all 4 date formats (ISO with tz, ISO without tz treated as UTC, epoch seconds, and DD/MM/YYYY) into real UTC timestamps for correct sorting and filtering.
+  - Deduplicated the ~30 duplicate order IDs based on `updatedAt` comparison and file order.
+  - Put `updatedAt` nulls last when sorting by that column.
+  - Standardized status to lowercase and region to uppercase.
+  - Handled missing priority as `None`.
+  - Sanitized staff notes to plain text (stripped HTML tags so `<script>` or `<b>` won't render).
+  - Trimmed trailing space in `"INR "`.
+
+### Why I chose this
+`orders.json` is ~17.2 MB with 50,030 records. Parsing that much JSON and looping through to clean up records takes around 150-200ms of CPU time. Doing all that on the main thread made the page hang for a brief moment right after opening. Moving it into a Web Worker keeps the main UI thread completely free, so the loading spinner stays smooth and the browser never freezes.
+
+---
+
+## 5. The 200 rows question
+
+> *Case: A user selects 200 rows, applies a filter that hides 180 of them, and clicks Export. What do they get?*
+
+### What I chose
+**Export only the 20 visible rows that match the active filter**, and update the counter to show `20 selected (filtered from 200)` so the screen count always matches the exported CSV.
 
 ### Why
-- **Mental Model Integrity**: When an operations analyst applies a filter, their active focus is restricted to the filtered records. Exporting 180 rows that are currently hidden by active criteria can lead to unintended batch actions or compliance issues.
-- **Transparent Feedback**: The selection badge explicitly informs the user: `20 selected (filtered from 200 total)`. This guarantees that the selection count shown on screen strictly matches the exact count of rows exported to CSV.
+When an ops analyst applies a filter, their focus is on the records currently on their screen. If they export and get 180 hidden records that don't match their current filter, it can easily lead to mistakes (like acting on orders from the wrong status or region). Exporting what is currently visible makes the tool predictable.
+
+To make sure the user doesn't lose track of the other 180 rows they selected, the selection badge explicitly displays both: `20 selected (filtered from 200)`. If they want all 200 back, they can just clear the filter and click Export.
 
 ---
 
-## 6. Design Changes (vs Initial Sketches)
+## 6. Design changes (vs my initial sketch)
 
-- **Slide-Out Drawer over Fixed Dock**: The initial wireframe placed the detail panel as a fixed side-dock. In the final app, we adopted a slide-out drawer with a backdrop and keyboard `Escape` dismissal. This preserves maximum horizontal real estate for the 12 data columns on 13-inch laptop screens.
-- **Collapsible Filter Builder**: Added a toggle to collapse the filter builder into a slim status bar with active chips, giving operators maximum vertical viewport space for scanning rows once filters are established.
-
----
-
-## 7. Known Issues
-
-- **Mass URL Selection Limits**: Selecting all 50,000 rows in memory works smoothly, but storing 50,000 IDs in URL query parameters would exceed browser URL length limits (8KB–32KB). In mass-selection states, URL serialization caps the parameter to maintain valid URLs.
-- **Mobile Display**: The UI is optimized specifically for 13-inch laptop displays (dense layout, monospaced tabular figures, keyboard-first navigation) and is not intended for narrow mobile touchscreens.
+- **Slide-over drawer instead of side split-pane:** In my initial sketch, I drew the order details as a side dock next to the grid. But on a 13-inch screen (around 1280px wide), having 12 data columns plus a persistent 380px side panel made the table feel too squeezed and caused excessive horizontal scrolling. I changed it to a slide-over drawer that pops up on `Enter` (or double-click) and dismisses with `Esc`.
+- **Collapsible filter builder:** I added a collapse toggle to the filter builder. Once an analyst sets up their filter conditions, they can collapse the builder to a slim bar with chips, giving the table maximum vertical space.
 
 ---
 
-## Keyboard Shortcuts Quick Reference
+## 7. Known issues & tradeoffs
 
-| Shortcut | Action |
-| :--- | :--- |
-| `↑` `↓` `←` `→` | Move focused cell with automatic scroll-into-view |
-| `Space` | Select / Deselect the focused row |
-| `Enter` | Open the focused row's complete Order Details drawer |
-| `Escape` | Close the Order Details drawer |
-| `Shift + Click` | Multi-select a range of rows |
-| Click Header | Sort column (Ascending → Descending → None) |
-| Header Divider Drag | Resize column width |
-| 📌 Header Pin | Pin/Unpin column to the left during horizontal scroll |
+- **URL length limit on massive selections:** If someone selects all 50,000 rows (e.g. via select-all), putting all 50,000 order IDs into the URL `?sel=...` would blow past the browser URL length limit (which is usually 8KB to 32KB). In that edge case, the app keeps all 50,000 selected in memory, but caps the serialized IDs in the URL to avoid breaking the page.
+- **Date timezone boundaries:** Dates are parsed and displayed in UTC as specified in the notes. Filter inputs use UTC day boundaries (`00:00` to `23:59:59 UTC`), so someone in a different local timezone might see orders aligned to UTC days rather than their local midnight.
+- **Designed strictly for 13" laptops:** The layout is intentionally dense and keyboard-oriented for quick desktop scanning. It is not designed for mobile screens.
+
+---
+
+## Keyboard shortcuts
+
+- `↑` `↓` `←` `→`: Move focused cell (automatically scrolls the grid into view)
+- `Space`: Select / deselect the focused row
+- `Enter`: Open details drawer for the focused row
+- `Esc`: Close the details drawer
+- `Shift + Click`: Select a range of rows
+- Click header: Sort column (Ascending → Descending → Reset)
+- Header divider drag: Resize column width
+- 📌 icon on header: Pin column to the left during horizontal scroll
